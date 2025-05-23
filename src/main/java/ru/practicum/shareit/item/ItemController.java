@@ -12,7 +12,6 @@ import ru.practicum.shareit.exception.ForbiddenException;
 
 import jakarta.validation.Valid;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Map;
 
 @RestController
