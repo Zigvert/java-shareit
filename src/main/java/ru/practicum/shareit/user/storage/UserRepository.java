@@ -19,9 +19,6 @@ public class UserRepository {
     }
 
     public User findById(Long id) {
-        if (!users.containsKey(id)) {
-            throw new NoSuchElementException("User not found with id: " + id);
-        }
         return users.get(id);
     }
 

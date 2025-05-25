@@ -7,12 +7,9 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.service.ItemService;
-import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.exception.ForbiddenException;
 
 import jakarta.validation.Valid;
 import java.util.Collection;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/items")
@@ -49,17 +46,5 @@ public class ItemController {
     public ResponseEntity<Collection<ItemDto>> search(@RequestHeader("X-Sharer-User-Id") Long userId,
                                                       @RequestParam String text) {
         return ResponseEntity.ok(itemService.search(text));
-    }
-
-    @ExceptionHandler(NotFoundException.class)
-    public ResponseEntity<Map<String, String>> handleNotFoundException(NotFoundException ex) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(Map.of("error", ex.getMessage()));
-    }
-
-    @ExceptionHandler(ForbiddenException.class)
-    public ResponseEntity<Map<String, String>> handleForbiddenException(ForbiddenException ex) {
-        return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                .body(Map.of("error", ex.getMessage()));
     }
 }
