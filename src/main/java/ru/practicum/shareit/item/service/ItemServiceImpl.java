@@ -34,7 +34,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public ItemDto create(Long userId, ItemDto itemDto) {
         User owner = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("User not found"));
+                .orElseThrow(() -> new NotFoundException("Пользователь не найден с id: " + userId));
         Item item = itemMapper.toEntity(itemDto);
         item.setOwner(owner);
         return itemMapper.toDto(itemRepository.save(item));
@@ -43,9 +43,9 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public ItemDto update(Long userId, Long itemId, ItemDto itemDto) {
         Item item = itemRepository.findById(itemId)
-                .orElseThrow(() -> new NotFoundException("Item not found"));
+                .orElseThrow(() -> new NotFoundException("Предмет не найден с id: " + itemId));
         if (!item.getOwner().getId().equals(userId)) {
-            throw new NotFoundException("Only owner can update item");
+            throw new NotFoundException("Пользователь не является владельцем предмета");
         }
         if (itemDto.getName() != null) item.setName(itemDto.getName());
         if (itemDto.getDescription() != null) item.setDescription(itemDto.getDescription());
@@ -56,7 +56,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public ItemDto get(Long userId, Long itemId) {
         Item item = itemRepository.findById(itemId)
-                .orElseThrow(() -> new NotFoundException("Item not found"));
+                .orElseThrow(() -> new NotFoundException("Предмет не найден с id: " + itemId));
         ItemDto itemDto = itemMapper.toDto(item);
 
         if (item.getOwner().getId().equals(userId)) {
@@ -102,5 +102,4 @@ public class ItemServiceImpl implements ItemService {
                 .map(itemMapper::toDto)
                 .collect(Collectors.toList());
     }
-
 }
