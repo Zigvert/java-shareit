@@ -21,7 +21,8 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDto create(Long userId, ItemDto itemDto) {
-        User user = getUserOrThrow(userId);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Пользователь не найден с id: " + userId));
 
         Item item = ItemMapper.toItem(itemDto);
         item.setOwner(user);
@@ -30,11 +31,13 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDto update(Long userId, Long itemId, ItemDto itemDto) {
-        User user = getUserOrThrow(userId);
-        Item existingItem = getItemOrThrow(itemId);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Пользователь не найден с id: " + userId));
+        Item existingItem = itemRepository.findById(itemId)
+                .orElseThrow(() -> new NotFoundException("Предмет не найден с id: " + itemId));
 
         if (!existingItem.getOwner().getId().equals(user.getId())) {
-            throw new NotFoundException("User is not the owner of the item");
+            throw new NotFoundException("Пользователь не является владельцем предмета");
         }
 
         if (itemDto.getName() != null && !itemDto.getName().isBlank()) {
@@ -52,7 +55,8 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDto getById(Long itemId) {
-        Item item = getItemOrThrow(itemId);
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new NotFoundException("Предмет не найден с id: " + itemId));
         return ItemMapper.toDto(item);
     }
 
@@ -71,21 +75,5 @@ public class ItemServiceImpl implements ItemService {
         return itemRepository.search(text).stream()
                 .map(ItemMapper::toDto)
                 .collect(Collectors.toList());
-    }
-
-    private User getUserOrThrow(Long userId) {
-        User user = userRepository.findById(userId);
-        if (user == null) {
-            throw new NotFoundException("User not found with id: " + userId);
-        }
-        return user;
-    }
-
-    private Item getItemOrThrow(Long itemId) {
-        Item item = itemRepository.findById(itemId);
-        if (item == null) {
-            throw new NotFoundException("Item not found with id: " + itemId);
-        }
-        return item;
     }
 }

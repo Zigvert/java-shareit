@@ -19,11 +19,8 @@ public class ItemRepository {
         return item;
     }
 
-    public Item findById(Long id) {
-        if (!items.containsKey(id)) {
-            throw new NoSuchElementException("Item not found with id: " + id);
-        }
-        return items.get(id);
+    public Optional<Item> findById(Long id) {
+        return Optional.ofNullable(items.get(id));
     }
 
     public List<Item> findAllByOwnerId(Long ownerId) {

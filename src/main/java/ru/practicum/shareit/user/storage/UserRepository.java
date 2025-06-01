@@ -18,8 +18,8 @@ public class UserRepository {
         return user;
     }
 
-    public User findById(Long id) {
-        return users.get(id);
+    public Optional<User> findById(Long id) {
+        return Optional.ofNullable(users.get(id));
     }
 
     public List<User> findAll() {

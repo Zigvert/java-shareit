@@ -21,7 +21,7 @@ public class UserServiceImpl implements UserService {
     public UserDto create(UserDto userDto) {
         if (repository.findAll().stream()
                 .anyMatch(user -> user.getEmail().equals(userDto.getEmail()))) {
-            throw new ConflictException("Email already exists: " + userDto.getEmail());
+            throw new ConflictException("Email уже используется: " + userDto.getEmail());
         }
         User user = UserMapper.toUser(userDto);
         return UserMapper.toDto(repository.save(user));
@@ -29,15 +29,13 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto update(Long id, UserDto userDto) {
-        User existing = repository.findById(id);
-        if (existing == null) {
-            throw new NotFoundException("User not found with id: " + id);
-        }
+        User existing = repository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Пользователь не найден с id: " + id));
 
         if (userDto.getEmail() != null && !userDto.getEmail().equals(existing.getEmail())) {
             if (repository.findAll().stream()
                     .anyMatch(user -> user.getEmail().equals(userDto.getEmail()) && !user.getId().equals(id))) {
-                throw new ConflictException("Email already exists: " + userDto.getEmail());
+                throw new ConflictException("Email уже используется: " + userDto.getEmail());
             }
             existing.setEmail(userDto.getEmail());
         }
@@ -51,10 +49,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto getById(Long id) {
-        User user = repository.findById(id);
-        if (user == null) {
-            throw new NotFoundException("User not found with id: " + id);
-        }
+        User user = repository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Пользователь не найден с id: " + id));
         return UserMapper.toDto(user);
     }
 
@@ -67,6 +63,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void delete(Long id) {
+        repository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Пользователь не найден с id: " + id));
         repository.delete(id);
     }
 }
