@@ -19,11 +19,8 @@ public class ItemRepository {
         return item;
     }
 
-    public Item findById(Long id) {
-        if (!items.containsKey(id)) {
-            throw new NoSuchElementException("Item not found with id: " + id);
-        }
-        return items.get(id);
+    public Optional<Item> findById(Long id) {
+        return Optional.ofNullable(items.get(id));
     }
 
     public List<Item> findAllByOwnerId(Long ownerId) {
@@ -38,8 +35,8 @@ public class ItemRepository {
         }
         return items.values().stream()
                 .filter(item -> item.getAvailable() &&
-                        (item.getName().toLowerCase().contains(text.toLowerCase()) ||
-                                item.getDescription().toLowerCase().contains(text.toLowerCase())))
+                        ((item.getName() != null && item.getName().toLowerCase().contains(text.toLowerCase())) ||
+                                (item.getDescription() != null && item.getDescription().toLowerCase().contains(text.toLowerCase()))))
                 .collect(Collectors.toList());
     }
 
