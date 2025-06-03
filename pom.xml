@@ -80,6 +80,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-plugin</artifactId>
+					<version>3.2.5</version>
 					<configuration>
 						<systemPropertyVariables>
 							<spring.profiles.active>test</spring.profiles.active>
@@ -123,9 +124,6 @@
 					<groupId>org.jacoco</groupId>
 					<artifactId>jacoco-maven-plugin</artifactId>
 					<version>0.8.12</version>
-					<configuration>
-						<output>file</output>
-					</configuration>
 					<executions>
 						<execution>
 							<id>jacoco-initialize</id>
@@ -212,4 +210,5 @@
 			</build>
 		</profile>
 	</profiles>
+
 </project>
