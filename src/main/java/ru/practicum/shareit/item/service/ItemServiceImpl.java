@@ -33,46 +33,30 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDto create(Long userId, ItemDto itemDto) {
-<<<<<<< HEAD
         User owner = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь не найден с id: " + userId));
         Item item = itemMapper.toEntity(itemDto);
         item.setOwner(owner);
         return itemMapper.toDto(itemRepository.save(item));
-=======
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("Пользователь не найден с id: " + userId));
-
-        Item item = ItemMapper.toItem(itemDto);
-        item.setOwner(user);
-        return ItemMapper.toDto(itemRepository.save(item));
->>>>>>> main
     }
 
     @Override
     public ItemDto update(Long userId, Long itemId, ItemDto itemDto) {
-<<<<<<< HEAD
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new NotFoundException("Предмет не найден с id: " + itemId));
-        if (!item.getOwner().getId().equals(userId)) {
-=======
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("Пользователь не найден с id: " + userId));
-        Item existingItem = itemRepository.findById(itemId)
-                .orElseThrow(() -> new NotFoundException("Предмет не найден с id: " + itemId));
 
-        if (!existingItem.getOwner().getId().equals(user.getId())) {
->>>>>>> main
+        if (!item.getOwner().getId().equals(userId)) {
             throw new NotFoundException("Пользователь не является владельцем предмета");
         }
+
         if (itemDto.getName() != null) item.setName(itemDto.getName());
         if (itemDto.getDescription() != null) item.setDescription(itemDto.getDescription());
         if (itemDto.getAvailable() != null) item.setAvailable(itemDto.getAvailable());
+
         return itemMapper.toDto(itemRepository.save(item));
     }
 
     @Override
-<<<<<<< HEAD
     public ItemDto get(Long userId, Long itemId) {
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new NotFoundException("Предмет не найден с id: " + itemId));
@@ -89,12 +73,12 @@ public class ItemServiceImpl implements ItemService {
         itemDto.setComments(commentRepository.findAllByItemId(itemId).stream()
                 .map(commentMapper::toDto).collect(Collectors.toList()));
         return itemDto;
-=======
+    }
+
     public ItemDto getById(Long itemId) {
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new NotFoundException("Предмет не найден с id: " + itemId));
-        return ItemMapper.toDto(item);
->>>>>>> main
+        return itemMapper.toDto(item);
     }
 
     @Override
