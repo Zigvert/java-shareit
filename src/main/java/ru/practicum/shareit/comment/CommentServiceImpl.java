@@ -6,6 +6,7 @@ import ru.practicum.shareit.booking.BookingStatus;
 import ru.practicum.shareit.booking.storage.BookingRepository;
 import ru.practicum.shareit.comment.dto.CommentCreateDto;
 import ru.practicum.shareit.comment.dto.CommentDto;
+import ru.practicum.shareit.comment.Comment;
 import ru.practicum.shareit.comment.storage.CommentRepository;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
@@ -35,16 +36,12 @@ public class CommentServiceImpl implements CommentService {
         boolean hasBooking = bookingRepository.findAllByBookerIdAndItemIdAndEndBefore(
                         userId, itemId, LocalDateTime.now()).stream()
                 .anyMatch(b -> b.getStatus() == BookingStatus.APPROVED);
+
         if (!hasBooking) {
             throw new ValidationException("User has not booked this item");
         }
 
-        Comment comment = new Comment();
-        comment.setText(commentDto.getText());
-        comment.setItem(item);
-        comment.setAuthor(author);
-        comment.setCreated(LocalDateTime.now());
-
+        Comment comment = commentMapper.toEntity(commentDto, item, author);
         return commentMapper.toDto(commentRepository.save(comment));
     }
 }

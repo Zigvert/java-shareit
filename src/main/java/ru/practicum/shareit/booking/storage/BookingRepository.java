@@ -1,114 +1,61 @@
 package ru.practicum.shareit.booking.storage;
 
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.BookingStatus;
 
 import java.time.LocalDateTime;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.List;
 
 @Repository
-public class BookingRepository {
-    private final Map<Long, Booking> bookings = new HashMap<>();
-    private long nextId = 1;
+public interface BookingRepository extends JpaRepository<Booking, Long> {
 
-    public Booking save(Booking booking) {
-        if (booking.getId() == null) {
-            booking.setId(nextId++);
-        }
-        bookings.put(booking.getId(), booking);
-        return booking;
-    }
+    List<Booking> findByItemIdAndStatusInAndEndAfter(Long itemId, List<BookingStatus> statuses, LocalDateTime end);
 
-    public Optional<Booking> findById(Long id) {
-        return Optional.ofNullable(bookings.get(id));
-    }
+    @Query("SELECT b FROM Booking b WHERE b.booker.id = :bookerId ORDER BY b.start DESC")
+    List<Booking> findAllByBookerId(Long bookerId, Pageable pageable);
 
-    public List<Booking> findAllByBookerId(Long bookerId, String state, int from, int size) {
-        List<Booking> result = bookings.values().stream()
-                .filter(b -> b.getBooker().getId().equals(bookerId))
-                .sorted((b1, b2) -> b2.getStart().compareTo(b1.getStart()))
-                .collect(Collectors.toList());
+    @Query("SELECT b FROM Booking b WHERE b.item.owner.id = :ownerId ORDER BY b.start DESC")
+    List<Booking> findAllByOwnerId(Long ownerId, Pageable pageable);
 
-        return filterByState(result, state, from, size);
-    }
+    @Query("SELECT b FROM Booking b WHERE b.booker.id = :bookerId AND b.start < :now AND b.end > :now ORDER BY b.start DESC")
+    List<Booking> findCurrentByBookerId(Long bookerId, LocalDateTime now, Pageable pageable);
 
-    public List<Booking> findAllByOwnerId(Long ownerId, String state, int from, int size) {
-        List<Booking> result = bookings.values().stream()
-                .filter(b -> b.getItem().getOwner().getId().equals(ownerId))
-                .sorted((b1, b2) -> b2.getStart().compareTo(b1.getStart()))
-                .collect(Collectors.toList());
+    @Query("SELECT b FROM Booking b WHERE b.booker.id = :bookerId AND b.end < :now ORDER BY b.start DESC")
+    List<Booking> findPastByBookerId(Long bookerId, LocalDateTime now, Pageable pageable);
 
-        return filterByState(result, state, from, size);
-    }
+    @Query("SELECT b FROM Booking b WHERE b.booker.id = :bookerId AND b.start > :now ORDER BY b.start DESC")
+    List<Booking> findFutureByBookerId(Long bookerId, LocalDateTime now, Pageable pageable);
 
-    public List<Booking> findLastBooking(Long itemId, LocalDateTime now) {
-        return bookings.values().stream()
-                .filter(b -> b.getItem().getId().equals(itemId))
-                .filter(b -> b.getEnd().isBefore(now))
-                .filter(b -> b.getStatus() == BookingStatus.APPROVED)
-                .sorted((b1, b2) -> b2.getEnd().compareTo(b1.getEnd()))
-                .limit(1)
-                .collect(Collectors.toList());
-    }
+    @Query("SELECT b FROM Booking b WHERE b.booker.id = :bookerId AND b.status = :status ORDER BY b.start DESC")
+    List<Booking> findByBookerIdAndStatus(Long bookerId, BookingStatus status, Pageable pageable);
 
-    public List<Booking> findNextBooking(Long itemId, LocalDateTime now) {
-        return bookings.values().stream()
-                .filter(b -> b.getItem().getId().equals(itemId))
-                .filter(b -> b.getStart().isAfter(now))
-                .filter(b -> b.getStatus() == BookingStatus.APPROVED)
-                .sorted(Comparator.comparing(Booking::getStart))
-                .limit(1)
-                .collect(Collectors.toList());
-    }
+    @Query("SELECT b FROM Booking b WHERE b.item.owner.id = :ownerId AND b.start < :now AND b.end > :now ORDER BY b.start DESC")
+    List<Booking> findCurrentByOwnerId(Long ownerId, LocalDateTime now, Pageable pageable);
 
-    public List<Booking> findAllByBookerIdAndItemIdAndEndBefore(Long bookerId, Long itemId, LocalDateTime now) {
-        return bookings.values().stream()
-                .filter(b -> b.getBooker().getId().equals(bookerId))
-                .filter(b -> b.getItem().getId().equals(itemId))
-                .filter(b -> b.getEnd().isBefore(now))
-                .collect(Collectors.toList());
-    }
+    @Query("SELECT b FROM Booking b WHERE b.item.owner.id = :ownerId AND b.end < :now ORDER BY b.start DESC")
+    List<Booking> findPastByOwnerId(Long ownerId, LocalDateTime now, Pageable pageable);
 
-    private List<Booking> filterByState(List<Booking> bookings, String state, int from, int size) {
-        LocalDateTime now = LocalDateTime.now();
-        List<Booking> filtered;
-        switch (state.toUpperCase()) {
-            case "ALL":
-                filtered = bookings;
-                break;
-            case "CURRENT":
-                filtered = bookings.stream()
-                        .filter(b -> b.getStart().isBefore(now) && b.getEnd().isAfter(now))
-                        .collect(Collectors.toList());
-                break;
-            case "PAST":
-                filtered = bookings.stream()
-                        .filter(b -> b.getEnd().isBefore(now))
-                        .collect(Collectors.toList());
-                break;
-            case "FUTURE":
-                filtered = bookings.stream()
-                        .filter(b -> b.getStart().isAfter(now))
-                        .collect(Collectors.toList());
-                break;
-            case "WAITING":
-                filtered = bookings.stream()
-                        .filter(b -> b.getStatus() == BookingStatus.WAITING)
-                        .collect(Collectors.toList());
-                break;
-            case "REJECTED":
-                filtered = bookings.stream()
-                        .filter(b -> b.getStatus() == BookingStatus.REJECTED)
-                        .collect(Collectors.toList());
-                break;
-            default:
-                throw new IllegalArgumentException("Unknown state: " + state);
-        }
-        return filtered.stream()
-                .skip(from)
-                .limit(size)
-                .collect(Collectors.toList());
-    }
+    @Query("SELECT b FROM Booking b WHERE b.item.owner.id = :ownerId AND b.start > :now ORDER BY b.start DESC")
+    List<Booking> findFutureByOwnerId(Long ownerId, LocalDateTime now, Pageable pageable);
+
+    @Query("SELECT b FROM Booking b WHERE b.item.owner.id = :ownerId AND b.status = :status ORDER BY b.start DESC")
+    List<Booking> findByOwnerIdAndStatus(Long ownerId, BookingStatus status, Pageable pageable);
+
+    @Query("SELECT b FROM Booking b WHERE b.item.id = :itemId AND b.end < :now AND b.status = 'APPROVED' ORDER BY b.end DESC")
+    List<Booking> findLastBooking(Long itemId, LocalDateTime now, Pageable pageable);
+
+    @Query("SELECT b FROM Booking b WHERE b.item.id = :itemId AND b.start > :now AND b.status = 'APPROVED' ORDER BY b.start ASC")
+    List<Booking> findNextBooking(Long itemId, LocalDateTime now, Pageable pageable);
+
+    List<Booking> findByBookerIdAndItemIdAndEndBefore(Long bookerId, Long itemId, LocalDateTime now);
+
+    List<Booking> findAllByBookerIdAndItemIdAndEndBefore(Long bookerId, Long itemId, LocalDateTime now);
+
+    List<Booking> findTop1ByItemIdAndStatusAndEndBeforeOrderByEndDesc(Long itemId, BookingStatus status, LocalDateTime now);
+
+    List<Booking> findTop1ByItemIdAndStatusAndStartAfterOrderByStartAsc(Long itemId, BookingStatus status, LocalDateTime now);
 }
