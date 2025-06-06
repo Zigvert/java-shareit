@@ -33,7 +33,6 @@ public class ItemServiceImpl implements ItemService {
     private final BookingRepository bookingRepository;
     private final CommentRepository commentRepository;
     private final ItemMapper itemMapper;
-    private final BookingMapper bookingMapper;
 
     @Override
     public ItemDto create(Long userId, ItemDto itemDto) {
@@ -78,8 +77,8 @@ public class ItemServiceImpl implements ItemService {
                     itemId, BookingStatus.APPROVED, now);
             List<Booking> nextBooking = bookingRepository.findTop1ByItemIdAndStatusAndStartAfterOrderByStartAsc(
                     itemId, BookingStatus.APPROVED, now);
-            itemDto.setLastBooking(lastBooking.isEmpty() ? null : bookingMapper.toShortDto(lastBooking.get(0)));
-            itemDto.setNextBooking(nextBooking.isEmpty() ? null : bookingMapper.toShortDto(nextBooking.get(0)));
+            itemDto.setLastBooking(lastBooking.isEmpty() ? null : BookingMapper.toShortDto(lastBooking.get(0)));
+            itemDto.setNextBooking(nextBooking.isEmpty() ? null : BookingMapper.toShortDto(nextBooking.get(0)));
         }
 
         return itemDto;
@@ -102,8 +101,8 @@ public class ItemServiceImpl implements ItemService {
                             item.getId(), BookingStatus.APPROVED, now);
                     List<Booking> nextBooking = bookingRepository.findTop1ByItemIdAndStatusAndStartAfterOrderByStartAsc(
                             item.getId(), BookingStatus.APPROVED, now);
-                    dto.setLastBooking(lastBooking.isEmpty() ? null : bookingMapper.toShortDto(lastBooking.get(0)));
-                    dto.setNextBooking(nextBooking.isEmpty() ? null : bookingMapper.toShortDto(nextBooking.get(0)));
+                    dto.setLastBooking(lastBooking.isEmpty() ? null : BookingMapper.toShortDto(lastBooking.get(0)));
+                    dto.setNextBooking(nextBooking.isEmpty() ? null : BookingMapper.toShortDto(nextBooking.get(0)));
                     return dto;
                 })
                 .collect(Collectors.toList());
