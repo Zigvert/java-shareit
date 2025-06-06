@@ -22,7 +22,7 @@ public final class BookingMapper {
         dto.setStart(booking.getStart());
         dto.setEnd(booking.getEnd());
         dto.setItem(new ItemSummaryDto(booking.getItem().getId(), booking.getItem().getName()));
-        dto.setBooker(new BookerDto(booking.getBooker().getId()));
+        dto.setBooker(new BookerDto(booking.getBooker().getId(), booking.getBooker().getName()));
         dto.setStatus(booking.getStatus());
         return dto;
     }

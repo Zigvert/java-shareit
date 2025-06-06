@@ -28,48 +28,52 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public BookingDto create(Long userId, BookingCreateDto bookingDto) {
+        // Проверка существования пользователя
         User booker = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User with id " + userId + " not found"));
 
+        // Проверка существования предмета
         Item item = itemRepository.findById(bookingDto.getItemId())
                 .orElseThrow(() -> new NotFoundException("Item with id " + bookingDto.getItemId() + " not found"));
 
+        // Проверка доступности предмета
         if (!item.getAvailable()) {
-            throw new ValidationException("Item with id " + bookingDto.getItemId() + " is not available");
+            throw new ValidationException("Item with id " + item.getId() + " is not available");
         }
 
+        // Проверка, что владелец не может бронировать свой предмет
         if (item.getOwner().getId().equals(userId)) {
-            throw new ForbiddenException("Owner cannot book their own item");
+            throw new NotFoundException("Owner cannot book their own item");
         }
 
+        // Валидация дат
         if (bookingDto.getStart() == null || bookingDto.getEnd() == null) {
             throw new ValidationException("Start and end dates must not be null");
         }
 
-        if (bookingDto.getStart().isAfter(bookingDto.getEnd())
-                || bookingDto.getStart().equals(bookingDto.getEnd())
-                || bookingDto.getStart().isBefore(LocalDateTime.now())) {
-            throw new ValidationException("Invalid booking dates");
+        if (bookingDto.getStart().isAfter(bookingDto.getEnd()) || bookingDto.getStart().equals(bookingDto.getEnd())) {
+            throw new ValidationException("Start date must be before end date");
         }
 
+        if (bookingDto.getStart().isBefore(LocalDateTime.now())) {
+            throw new ValidationException("Start date cannot be in the past");
+        }
+
+        // Создание бронирования
         Booking booking = BookingMapper.toEntity(bookingDto, item, booker);
-        Booking saved = bookingRepository.save(booking);
+        booking.setStatus(BookingStatus.WAITING);
 
-        // 🔎 Отладка: лог содержимого перед возвратом
-        System.out.println("=== Booking Saved ===");
-        System.out.println("ID: " + saved.getId());
-        System.out.println("Item: " + saved.getItem());
-        System.out.println("Booker: " + saved.getBooker());
-        System.out.println("Status: " + saved.getStatus());
-        System.out.println("Start: " + saved.getStart());
-        System.out.println("End: " + saved.getEnd());
-
-        return BookingMapper.toDto(saved);
+        try {
+            Booking saved = bookingRepository.save(booking);
+            return BookingMapper.toDto(saved);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to save booking: " + e.getMessage(), e);
+        }
     }
 
     @Override
     public BookingDto approve(Long userId, Long bookingId, Boolean approved) {
-        userRepository.findById(userId)
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User with id " + userId + " not found"));
 
         Booking booking = bookingRepository.findById(bookingId)
@@ -84,19 +88,19 @@ public class BookingServiceImpl implements BookingService {
         }
 
         booking.setStatus(approved ? BookingStatus.APPROVED : BookingStatus.REJECTED);
-        return BookingMapper.toDto(bookingRepository.save(booking));
+        Booking saved = bookingRepository.save(booking);
+        return BookingMapper.toDto(saved);
     }
 
     @Override
     public BookingDto get(Long userId, Long bookingId) {
-        userRepository.findById(userId)
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User with id " + userId + " not found"));
 
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new NotFoundException("Booking with id " + bookingId + " not found"));
 
-        if (!booking.getBooker().getId().equals(userId)
-                && !booking.getItem().getOwner().getId().equals(userId)) {
+        if (!booking.getBooker().getId().equals(userId) && !booking.getItem().getOwner().getId().equals(userId)) {
             throw new ForbiddenException("User is neither booker nor owner");
         }
 
