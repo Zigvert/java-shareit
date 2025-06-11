@@ -9,6 +9,7 @@ import ru.practicum.shareit.booking.BookingStatus;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface BookingRepository extends JpaRepository<Booking, Long> {
@@ -58,4 +59,10 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<Booking> findTop1ByItemIdAndStatusAndEndBeforeOrderByEndDesc(Long itemId, BookingStatus status, LocalDateTime now);
 
     List<Booking> findTop1ByItemIdAndStatusAndStartAfterOrderByStartAsc(Long itemId, BookingStatus status, LocalDateTime now);
+
+    @Query("SELECT b FROM Booking b " +
+            "JOIN FETCH b.item " +
+            "JOIN FETCH b.booker " +
+            "WHERE b.id = :id")
+    Optional<Booking> findByIdWithItemAndBooker(Long id);
 }

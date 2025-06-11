@@ -21,7 +21,7 @@ public class BookingController {
     public ResponseEntity<BookingDto> create(@RequestHeader("X-Sharer-User-Id") Long userId,
                                              @Valid @RequestBody BookingCreateDto bookingDto) {
         BookingDto booking = bookingService.create(userId, bookingDto);
-        return ResponseEntity.status(HttpStatus.OK).body(booking);
+        return ResponseEntity.status(HttpStatus.CREATED).body(booking); // Используем 201
     }
 
     @PatchMapping("/{bookingId}")
