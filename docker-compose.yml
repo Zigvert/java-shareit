@@ -1,15 +1,15 @@
 version: '3.8'
 
 services:
-  postgres:
-    image: postgres:15
-    container_name: my_postgres
+  db:
+    image: postgres:13
+    container_name: shareit-db
     environment:
-      POSTGRES_USER: user123
-      POSTGRES_PASSWORD: pass123
-      POSTGRES_DB: mydb
+      POSTGRES_DB: shareit
+      POSTGRES_USER: shareit_user
+      POSTGRES_PASSWORD: shareit_pass
     ports:
-      - "5432:5432"  # Проброс порта контейнера на хост
+      - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
 
