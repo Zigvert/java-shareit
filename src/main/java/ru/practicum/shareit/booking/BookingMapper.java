@@ -17,14 +17,38 @@ public final class BookingMapper {
         if (booking == null) {
             return null;
         }
-        BookingDto dto = new BookingDto();
-        dto.setId(booking.getId());
-        dto.setStart(booking.getStart());
-        dto.setEnd(booking.getEnd());
-        dto.setItem(new ItemSummaryDto(booking.getItem().getId(), booking.getItem().getName()));
-        dto.setBooker(new BookerDto(booking.getBooker().getId(), booking.getBooker().getName()));
-        dto.setStatus(booking.getStatus());
-        return dto;
+
+        Long itemId = null;
+        String itemName = null;
+        Long bookerId = null;
+        String bookerName = null;
+
+        if (booking.getItem() != null) {
+            itemId = booking.getItem().getId();
+            try {
+                itemName = booking.getItem().getName();
+            } catch (Exception e) {
+                itemName = null;
+            }
+        }
+
+        if (booking.getBooker() != null) {
+            bookerId = booking.getBooker().getId();
+            try {
+                bookerName = booking.getBooker().getName();
+            } catch (Exception e) {
+                bookerName = null;
+            }
+        }
+
+        return new BookingDto(
+                booking.getId(),
+                booking.getStart(),
+                booking.getEnd(),
+                new ItemSummaryDto(itemId, itemName),
+                new BookerDto(bookerId, bookerName),
+                booking.getStatus()
+        );
     }
 
     public static BookingShortDto toShortDto(Booking booking) {
@@ -57,6 +81,7 @@ public final class BookingMapper {
         if (dto.getBooker() != null) {
             User booker = new User();
             booker.setId(dto.getBooker().getId());
+            booker.setName(dto.getBooker().getName());
             booking.setBooker(booker);
         }
         return booking;

@@ -1,5 +1,6 @@
 package ru.practicum.shareit.item.service;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -26,6 +27,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class ItemServiceImpl implements ItemService {
 
     private final ItemRepository itemRepository;
@@ -40,7 +42,7 @@ public class ItemServiceImpl implements ItemService {
                 .orElseThrow(() -> new NotFoundException("User with id " + userId + " not found"));
         Item item = itemMapper.toEntity(itemDto);
         item.setOwner(user);
-        return itemMapper.toDto(itemRepository.save(item));
+        return itemMapper.toDto(itemRepository.saveAndFlush(item)); // Сразу коммит
     }
 
     @Override
@@ -64,13 +66,11 @@ public class ItemServiceImpl implements ItemService {
                 .orElseThrow(() -> new NotFoundException("Item with id " + itemId + " not found"));
         ItemDto itemDto = itemMapper.toDto(item);
 
-        // Добавление комментариев
         List<CommentDto> comments = commentRepository.findAllByItemId(itemId).stream()
                 .map(this::toCommentDto)
                 .collect(Collectors.toList());
         itemDto.setComments(comments);
 
-        // Добавление lastBooking и nextBooking для владельца
         if (item.getOwner().getId().equals(userId)) {
             LocalDateTime now = LocalDateTime.now();
             List<Booking> lastBooking = bookingRepository.findTop1ByItemIdAndStatusAndEndBeforeOrderByEndDesc(
@@ -128,7 +128,6 @@ public class ItemServiceImpl implements ItemService {
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new NotFoundException("Item with id " + itemId + " not found"));
 
-        // Проверка, что пользователь завершил бронирование
         boolean hasBooking = bookingRepository.findAllByBookerIdAndItemIdAndEndBefore(
                         userId, itemId, LocalDateTime.now()).stream()
                 .anyMatch(booking -> booking.getStatus().equals(BookingStatus.APPROVED));
