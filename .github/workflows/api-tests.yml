@@ -3,6 +3,4 @@ name: ShareIt API Tests
 on:
   pull_request:
 
-jobs:
-  build:
-    uses: yandex-praktikum/java-shareit/.github/workflows/api-tests.yml@ci
+jobs: build: uses: yandex-praktikum/java-shareit/.github/workflows/api-tests.yml@ci with: java-version: '21' env: SPRING_DATASOURCE_URL: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.h2.Driver SPRING_DATASOURCE_USERNAME: sa SPRING_DATASOURCE_PASSWORD: '' SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.H2Dialect SPRING_JPA_HIBERNATE_DDL_AUTO: create-drop SPRING_SQL_INIT_MODE: always SPRING_SQL_INIT_SCHEMA_LOCATIONS: classpath:schema.sql SPRING_SQL_INIT_DATA_LOCATIONS: classpath:data.sql SPRING_SQL_INIT_ENABLED: true SPRING_JPA_SHOW_SQL: true POSTMAN_COLLECTION: Sprint_15_ShareIt_add-bookings.postman_collection.json POSTMAN_ENVIRONMENT: environment.json
