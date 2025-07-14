@@ -42,17 +42,18 @@ public class BookingServiceImpl implements BookingService {
         if (item.getOwner().getId().equals(userId)) {
             throw new NotFoundException("Owner cannot book own item");
         }
-        if (bookingDto.getStart() == null || bookingDto.getEnd() == null ||
-                bookingDto.getStart().isAfter(bookingDto.getEnd()) ||
-                bookingDto.getStart().isEqual(bookingDto.getEnd())) {
-            throw new ValidationException("Invalid booking dates");
+
+        boolean overlapExists = bookingRepository.existsByItemIdAndStatusAndStartLessThanAndEndGreaterThan(
+                item.getId(),
+                BookingStatus.APPROVED,
+                bookingDto.getEnd(),
+                bookingDto.getStart()
+        );
+        if (overlapExists) {
+            throw new ValidationException("Booking overlaps with an existing approved booking");
         }
 
-        Booking booking = new Booking();
-        booking.setStart(bookingDto.getStart());
-        booking.setEnd(bookingDto.getEnd());
-        booking.setItem(item);
-        booking.setBooker(booker);
+        Booking booking = BookingMapper.fromDto(bookingDto, booker, item);
         booking.setStatus(BookingStatus.WAITING);
 
         return BookingMapper.toResponseDto(bookingRepository.save(booking));
