@@ -24,6 +24,12 @@ jobs:
         run: |
           nohup mvn spring-boot:run > app.log 2>&1 &
           sleep 25
+          echo "===== SPRING LOG START ====="
+          tail -n 100 app.log || true
+          echo "===== SPRING LOG END ====="
+
+      - name: Check if server is up
+        run: curl -f http://localhost:8080/users || (echo "Spring Boot not responding" && cat app.log && exit 1)
 
       - name: Install Newman
         run: npm install -g newman newman-reporter-htmlextra
