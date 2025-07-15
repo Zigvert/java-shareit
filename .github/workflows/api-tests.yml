@@ -9,11 +9,11 @@ jobs:
 
     services:
       postgres:
-        image: postgres:14
+        image: postgres:15
         env:
           POSTGRES_DB: shareit
           POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: admin
+          POSTGRES_PASSWORD: postgres
         ports:
           - 5432:5432
         options: >-
