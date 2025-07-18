@@ -5,4 +5,59 @@ on:
 
 jobs:
   build:
-    uses: yandex-praktikum/java-shareit/.github/workflows/api-tests.yml@ci
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: shareit
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v3
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Build project
+        run: mvn clean install -DskipTests
+
+      - name: Start Spring Boot app
+        run: |
+          nohup mvn spring-boot:run > app.log 2>&1 &
+          sleep 25
+          echo "===== SPRING LOG START ====="
+          tail -n 100 app.log || true
+          echo "===== SPRING LOG END ====="
+
+      - name: Check if server is up
+        run: curl -f http://localhost:8080/users || (echo "Spring Boot not responding" && cat app.log && exit 1)
+
+      - name: Install Newman
+        run: npm install -g newman newman-reporter-htmlextra
+
+      - name: Run Postman tests
+        run: |
+          newman run ./tests/postman/sprint.json \
+            --delay-request 50 \
+            -r cli,htmlextra \
+            --verbose \
+            --color on \
+            --reporter-htmlextra-darkTheme \
+            --reporter-htmlextra-export reports/shareIt.html \
+            --reporter-htmlextra-title "Отчет по тестам" \
+            --reporter-htmlextra-logs true \
+            --reporter-htmlextra-template ./tests/.github/workflows/dashboard-template.hbs
