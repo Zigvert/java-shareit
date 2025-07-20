@@ -14,7 +14,7 @@
 	</parent>
 
 	<groupId>ru.practicum</groupId>
-	<artifactId>shareit-parent</artifactId> <!-- суффикс -parent -->
+	<artifactId>shareit-parent</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>ShareIt Parent</name>
@@ -36,22 +36,7 @@
 	<build>
 		<pluginManagement>
 			<plugins>
-				<!-- Spring Boot Maven Plugin для всех модулей -->
-				<plugin>
-					<groupId>org.springframework.boot</groupId>
-					<artifactId>spring-boot-maven-plugin</artifactId>
-					<version>${spring.boot.version}</version>
-					<configuration>
-						<excludes>
-							<exclude>
-								<groupId>org.projectlombok</groupId>
-								<artifactId>lombok</artifactId>
-							</exclude>
-						</excludes>
-					</configuration>
-				</plugin>
-
-				<!-- Jacoco для покрытия -->
+				<!-- Настройка Jacoco для всех модулей -->
 				<plugin>
 					<groupId>org.jacoco</groupId>
 					<artifactId>jacoco-maven-plugin</artifactId>
@@ -72,6 +57,8 @@
 						</execution>
 					</executions>
 				</plugin>
+
+				<!-- Не подключаем spring-boot-maven-plugin здесь, он будет в подпроектах -->
 			</plugins>
 		</pluginManagement>
 	</build>

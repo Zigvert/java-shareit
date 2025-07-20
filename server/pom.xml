@@ -70,4 +70,19 @@
 
     </dependencies>
 
+    <build>
+        <plugins>
+            <!-- Spring Boot Maven Plugin для запуска -->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>${spring.boot.version}</version>
+                <configuration>
+                    <!-- Укажи здесь полностью квалифицированный класс с методом main -->
+                    <mainClass>ru.practicum.shareit.ShareItApp</mainClass>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
 </project>
