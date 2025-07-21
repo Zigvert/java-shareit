@@ -16,36 +16,39 @@ import java.util.List;
 public class ItemRequestController {
 
     private final ItemRequestClient requestClient;
-
     private static final String USER_HEADER = "X-Sharer-User-Id";
 
     @PostMapping
-    public ItemRequestResponseDto createRequest(
+    public ResponseEntity<ItemRequestResponseDto> createRequest(
             @RequestHeader(USER_HEADER) Long userId,
             @Valid @RequestBody ItemRequestCreateDto requestDto
     ) {
-        return requestClient.createRequest(userId, requestDto).getBody();
+        ResponseEntity<ItemRequestResponseDto> response = requestClient.createRequest(userId, requestDto);
+        return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
     }
 
     @GetMapping
-    public List<ItemRequestResponseDto> getOwnRequests(
+    public ResponseEntity<List<ItemRequestResponseDto>> getOwnRequests(
             @RequestHeader(USER_HEADER) Long userId
     ) {
-        return requestClient.getOwnRequests(userId).getBody();
+        ResponseEntity<List<ItemRequestResponseDto>> response = requestClient.getOwnRequests(userId);
+        return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
     }
 
     @GetMapping("/all")
-    public List<ItemRequestResponseDto> getAllRequests(
+    public ResponseEntity<List<ItemRequestResponseDto>> getAllRequests(
             @RequestHeader(USER_HEADER) Long userId
     ) {
-        return requestClient.getAllRequests(userId).getBody();
+        ResponseEntity<List<ItemRequestResponseDto>> response = requestClient.getAllRequests(userId);
+        return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
     }
 
     @GetMapping("/{requestId}")
-    public ItemRequestResponseDto getRequestById(
+    public ResponseEntity<ItemRequestResponseDto> getRequestById(
             @RequestHeader(USER_HEADER) Long userId,
             @PathVariable Long requestId
     ) {
-        return requestClient.getRequestById(userId, requestId).getBody();
+        ResponseEntity<ItemRequestResponseDto> response = requestClient.getRequestById(userId, requestId);
+        return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
     }
 }

@@ -1,6 +1,8 @@
 package ru.practicum.shareit.request;
 
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.NotFoundException;
@@ -28,18 +30,25 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     private final UserRepository userRepository;
     private final ItemRepository itemRepository;
 
+    private final Logger log = LoggerFactory.getLogger(ItemRequestServiceImpl.class);
+
     @Override
     @Transactional
     public ItemRequestResponseDto create(Long userId, ItemRequestCreateDto dto) {
         User user = getUserOrThrow(userId);
+
+        if (dto.getDescription() == null || dto.getDescription().isBlank()) {
+            throw new IllegalArgumentException("Description must not be empty");
+        }
 
         ItemRequest request = new ItemRequest();
         request.setDescription(dto.getDescription());
         request.setRequester(user);
         request.setCreated(LocalDateTime.now());
 
-        request = requestRepository.save(request);
-        return ItemRequestMapper.toDto(request, List.of());
+        ItemRequest savedRequest = requestRepository.save(request);
+        log.info("Created new ItemRequest with id {}", savedRequest.getId());
+        return ItemRequestMapper.toDto(savedRequest, List.of());
     }
 
     @Override
@@ -71,25 +80,19 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         getUserOrThrow(userId);
 
         ItemRequest request = requestRepository.findById(requestId)
-                .orElseThrow(() -> new NotFoundException("Request not found"));
+                .orElseThrow(() -> new NotFoundException("Request with id " + requestId + " not found"));
 
         return ItemRequestMapper.toDto(request, getItemsByRequestId(request.getId()));
     }
 
-    // ======= Вспомогательные методы =======
-
     private User getUserOrThrow(Long userId) {
         return userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("User not found"));
+                .orElseThrow(() -> new NotFoundException("User with id " + userId + " not found"));
     }
 
     private List<ItemShortDto> getItemsByRequestId(Long requestId) {
-        List<Item> items = itemRepository.findAll()
-                .stream()
+        return itemRepository.findAll().stream()
                 .filter(item -> requestId.equals(item.getRequestId()))
-                .collect(Collectors.toList());
-
-        return items.stream()
                 .map(item -> new ItemShortDto(item.getId(), item.getName()))
                 .collect(Collectors.toList());
     }
