@@ -1,4 +1,4 @@
-package ru.practicum.shareit.request;
+package request;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -8,8 +8,9 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import ru.practicum.shareit.request.dto.ItemRequestCreateDto;
-import ru.practicum.shareit.request.dto.ItemRequestResponseDto;
+import ru.practicum.dto.ItemRequestCreateDto;
+import ru.practicum.dto.ItemRequestResponseDto;
+import ru.practicum.request.ItemRequestController;
 import ru.practicum.shareit.request.ItemRequestService;
 
 import java.time.LocalDateTime;
@@ -72,4 +73,17 @@ class ItemRequestControllerTest {
                 .andExpect(jsonPath("$[0].id").value(1))
                 .andExpect(jsonPath("$[0].description").value("Нужен молоток"));
     }
+
+    @Test
+    void createRequest_withEmptyDescription_shouldReturnBadRequest() throws Exception {
+        ItemRequestCreateDto createDto = new ItemRequestCreateDto();
+        createDto.setDescription(""); // Пустая строка — нарушаем @NotBlank
+
+        mockMvc.perform(post("/requests")
+                        .header(USER_HEADER, "1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(createDto)))
+                .andExpect(status().isBadRequest());
+    }
+
 }

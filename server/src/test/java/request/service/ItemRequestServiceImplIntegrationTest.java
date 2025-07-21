@@ -1,4 +1,4 @@
-package ru.practicum.shareit.request.service;
+package request.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -7,8 +7,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.request.ItemRequestService;
-import ru.practicum.shareit.request.dto.ItemRequestCreateDto;
-import ru.practicum.shareit.request.dto.ItemRequestResponseDto;
+import ru.practicum.dto.ItemRequestCreateDto;
+import ru.practicum.dto.ItemRequestResponseDto;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.storage.UserRepository;
 

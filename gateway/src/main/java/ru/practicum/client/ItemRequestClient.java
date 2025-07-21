@@ -1,6 +1,6 @@
 package ru.practicum.client;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -14,7 +14,6 @@ public class ItemRequestClient extends BaseClient {
 
     private static final String REQUESTS_API = "/requests";
 
-    @Autowired
     public ItemRequestClient(RestTemplate restTemplate) {
         super(restTemplate);
     }
@@ -23,12 +22,12 @@ public class ItemRequestClient extends BaseClient {
         return post(REQUESTS_API, userId, dto, ItemRequestResponseDto.class);
     }
 
-    public ResponseEntity<List> getOwnRequests(Long userId) {
-        return get(REQUESTS_API, userId, List.class);
+    public ResponseEntity<List<ItemRequestResponseDto>> getOwnRequests(Long userId) {
+        return get(REQUESTS_API, userId, new ParameterizedTypeReference<List<ItemRequestResponseDto>>() {});
     }
 
-    public ResponseEntity<List> getAllRequests(Long userId) {
-        return get(REQUESTS_API + "/all", userId, List.class);
+    public ResponseEntity<List<ItemRequestResponseDto>> getAllRequests(Long userId) {
+        return get(REQUESTS_API + "/all", userId, new ParameterizedTypeReference<List<ItemRequestResponseDto>>() {});
     }
 
     public ResponseEntity<ItemRequestResponseDto> getRequestById(Long userId, Long requestId) {
