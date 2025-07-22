@@ -28,8 +28,7 @@ class ItemRequestClientTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
 
-        // Через рефлексию или сеттер установим serverUrl, т.к. поле protected
-        // Для простоты сделаем рефлексию:
+        // Через рефлексию установим protected поле serverUrl у BaseClient
         try {
             var field = itemRequestClient.getClass().getSuperclass().getDeclaredField("serverUrl");
             field.setAccessible(true);
@@ -73,7 +72,7 @@ class ItemRequestClientTest {
         ResponseEntity<List<ItemRequestResponseDto>> responseEntity =
                 new ResponseEntity<>(mockList, HttpStatus.OK);
 
-        // Важно: используем ParameterizedTypeReference в when
+        // В when используем any() с указанием типа ParameterizedTypeReference<List<ItemRequestResponseDto>>
         when(restTemplate.exchange(
                 anyString(),
                 eq(HttpMethod.GET),

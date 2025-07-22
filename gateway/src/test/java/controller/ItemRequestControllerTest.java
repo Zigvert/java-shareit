@@ -1,4 +1,4 @@
-package request;
+package controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -8,9 +8,9 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import ru.practicum.dto.ItemRequestCreateDto;
-import ru.practicum.dto.ItemRequestResponseDto;
-import ru.practicum.request.ItemRequestController;
+import ru.practicum.shareit.request.ItemRequestController;
+import ru.practicum.shareit.request.dto.ItemRequestCreateDto;
+import ru.practicum.shareit.request.dto.ItemRequestResponseDto;
 import ru.practicum.shareit.request.ItemRequestService;
 
 import java.time.LocalDateTime;
@@ -19,17 +19,18 @@ import java.util.List;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(ItemRequestController.class)
+@WebMvcTest(controllers = ItemRequestController.class)
 class ItemRequestControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
-    private ItemRequestService itemRequestService;
-
     @Autowired
     private ObjectMapper objectMapper;
+
+    // Мок-сервис, который инжектится в контроллер
+    @MockBean
+    private ItemRequestService itemRequestService;
 
     private static final String USER_HEADER = "X-Sharer-User-Id";
 
@@ -77,7 +78,7 @@ class ItemRequestControllerTest {
     @Test
     void createRequest_withEmptyDescription_shouldReturnBadRequest() throws Exception {
         ItemRequestCreateDto createDto = new ItemRequestCreateDto();
-        createDto.setDescription(""); // Пустая строка — нарушаем @NotBlank
+        createDto.setDescription(""); // Пустая строка, нарушаем валидацию
 
         mockMvc.perform(post("/requests")
                         .header(USER_HEADER, "1")
@@ -85,5 +86,4 @@ class ItemRequestControllerTest {
                         .content(objectMapper.writeValueAsString(createDto)))
                 .andExpect(status().isBadRequest());
     }
-
 }

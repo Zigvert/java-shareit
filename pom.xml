@@ -57,7 +57,7 @@
 					</executions>
 				</plugin>
 
-				<!-- Не подключаем spring-boot-maven-plugin здесь, он будет в подпроектах -->
+				<!-- spring-boot-maven-plugin подключаем в подпроектах -->
 			</plugins>
 		</pluginManagement>
 	</build>

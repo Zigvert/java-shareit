@@ -1,14 +1,15 @@
-package request.service;
+package service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.ShareItApp;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.request.ItemRequestService;
-import ru.practicum.dto.ItemRequestCreateDto;
-import ru.practicum.dto.ItemRequestResponseDto;
+import ru.practicum.shareit.request.dto.ItemRequestCreateDto;
+import ru.practicum.shareit.request.dto.ItemRequestResponseDto;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.storage.UserRepository;
 
@@ -16,7 +17,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.*;
 
-@SpringBootTest
+@SpringBootTest(classes = ShareItApp.class)
 @Transactional
 class ItemRequestServiceImplIntegrationTest {
 
@@ -30,7 +31,6 @@ class ItemRequestServiceImplIntegrationTest {
 
     @BeforeEach
     void setup() {
-        // Создаем тестового пользователя (если в data.sql нет)
         User user = new User();
         user.setName("Test user");
         user.setEmail("test@example.com");
@@ -59,17 +59,15 @@ class ItemRequestServiceImplIntegrationTest {
     void getRequestById_whenNotFound_throws() {
         assertThatThrownBy(() -> itemRequestService.getRequestById(userId, 999L))
                 .isInstanceOf(NotFoundException.class)
-                .hasMessageContaining("Request not found");
+                .hasMessageContaining("Request with id 999 not found");
     }
 
     @Test
     void getAllRequests_excludesOwnRequests() {
-        // Создаем запрос от userId
         ItemRequestCreateDto createDto = new ItemRequestCreateDto();
         createDto.setDescription("Нужна отвертка");
         itemRequestService.create(userId, createDto);
 
-        // Создаем другого пользователя и запрос от него
         User other = new User();
         other.setName("Other user");
         other.setEmail("other@example.com");

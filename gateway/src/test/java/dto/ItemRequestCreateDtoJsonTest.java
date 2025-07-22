@@ -1,9 +1,9 @@
-package request.dto;
+package dto;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.autoconfigure.json.JsonTest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.json.JsonTest;
 import ru.practicum.dto.ItemRequestCreateDto;
 
 import static org.assertj.core.api.Assertions.assertThat;
