@@ -1,12 +1,12 @@
-package ru.practicum.request;
+package ru.practicum.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.client.ItemRequestClient;
-import ru.practicum.shareit.dto.ItemRequestCreateDto;
-import ru.practicum.shareit.dto.ItemRequestResponseDto;
+import ru.practicum.dto.ItemRequestCreateDto;
+import ru.practicum.dto.ItemRequestResponseDto;
 
 import java.util.List;
 

@@ -2,26 +2,22 @@ package dto;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.json.JsonTest;
 import ru.practicum.dto.ItemRequestCreateDto;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@JsonTest
 class ItemRequestCreateDtoJsonTest {
 
-    @Autowired
-    private ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Test
-    void serializeAndDeserialize() throws Exception {
+    void shouldSerializeAndDeserializeCorrectly() throws Exception {
         ItemRequestCreateDto dto = new ItemRequestCreateDto();
-        dto.setDescription("Описание запроса");
+        dto.setDescription("Нужен молоток");
 
         String json = objectMapper.writeValueAsString(dto);
-        ItemRequestCreateDto result = objectMapper.readValue(json, ItemRequestCreateDto.class);
+        ItemRequestCreateDto deserialized = objectMapper.readValue(json, ItemRequestCreateDto.class);
 
-        assertThat(result.getDescription()).isEqualTo("Описание запроса");
+        assertThat(deserialized.getDescription()).isEqualTo("Нужен молоток");
     }
 }

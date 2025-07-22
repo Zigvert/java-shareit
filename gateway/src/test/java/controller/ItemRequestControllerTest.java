@@ -1,89 +1,92 @@
-package controller;
+package ru.practicum.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
-import ru.practicum.shareit.request.ItemRequestController;
-import ru.practicum.shareit.request.dto.ItemRequestCreateDto;
-import ru.practicum.shareit.request.dto.ItemRequestResponseDto;
-import ru.practicum.shareit.request.ItemRequestService;
+import org.springframework.http.ResponseEntity;
+import ru.practicum.client.ItemRequestClient;
+import ru.practicum.dto.ItemRequestCreateDto;
+import ru.practicum.dto.ItemRequestResponseDto;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.*;
 
-@WebMvcTest(controllers = ItemRequestController.class)
 class ItemRequestControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+    private ItemRequestClient itemRequestClient;
+    private ItemRequestController controller;
 
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    // Мок-сервис, который инжектится в контроллер
-    @MockBean
-    private ItemRequestService itemRequestService;
-
-    private static final String USER_HEADER = "X-Sharer-User-Id";
-
-    @Test
-    void createRequest_returnsCreatedRequest() throws Exception {
-        ItemRequestCreateDto createDto = new ItemRequestCreateDto();
-        createDto.setDescription("Нужен гаечный ключ");
-
-        ItemRequestResponseDto responseDto = new ItemRequestResponseDto();
-        responseDto.setId(1L);
-        responseDto.setDescription("Нужен гаечный ключ");
-        responseDto.setCreated(LocalDateTime.now());
-        responseDto.setItems(List.of());
-
-        Mockito.when(itemRequestService.create(Mockito.anyLong(), Mockito.any()))
-                .thenReturn(responseDto);
-
-        mockMvc.perform(post("/requests")
-                        .header(USER_HEADER, "1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(createDto)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1))
-                .andExpect(jsonPath("$.description").value("Нужен гаечный ключ"));
+    @BeforeEach
+    void setUp() {
+        itemRequestClient = Mockito.mock(ItemRequestClient.class);
+        controller = new ItemRequestController(itemRequestClient);
     }
 
     @Test
-    void getOwnRequests_returnsList() throws Exception {
+    void shouldCreateRequest() {
+        Long userId = 1L;
+        ItemRequestCreateDto requestDto = new ItemRequestCreateDto();
+        requestDto.setDescription("Need item");
+
         ItemRequestResponseDto responseDto = new ItemRequestResponseDto();
-        responseDto.setId(1L);
-        responseDto.setDescription("Нужен молоток");
-        responseDto.setCreated(LocalDateTime.now());
-        responseDto.setItems(List.of());
+        responseDto.setId(100L);
+        responseDto.setDescription("Need item");
 
-        Mockito.when(itemRequestService.getOwnRequests(Mockito.anyLong()))
-                .thenReturn(List.of(responseDto));
+        ResponseEntity<ItemRequestResponseDto> mockedResponse = ResponseEntity.ok(responseDto);
 
-        mockMvc.perform(get("/requests")
-                        .header(USER_HEADER, "1"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id").value(1))
-                .andExpect(jsonPath("$[0].description").value("Нужен молоток"));
+        when(itemRequestClient.createRequest(userId, requestDto)).thenReturn(mockedResponse);
+
+        ResponseEntity<?> result = controller.createRequest(userId, requestDto);
+
+        verify(itemRequestClient, times(1)).createRequest(userId, requestDto);
+        assertEquals(mockedResponse, result);
     }
 
     @Test
-    void createRequest_withEmptyDescription_shouldReturnBadRequest() throws Exception {
-        ItemRequestCreateDto createDto = new ItemRequestCreateDto();
-        createDto.setDescription(""); // Пустая строка, нарушаем валидацию
+    void shouldGetOwnRequests() {
+        Long userId = 2L;
+        List<ItemRequestResponseDto> responseList = List.of(new ItemRequestResponseDto());
+        ResponseEntity<List<ItemRequestResponseDto>> mockedResponse = ResponseEntity.ok(responseList);
 
-        mockMvc.perform(post("/requests")
-                        .header(USER_HEADER, "1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(createDto)))
-                .andExpect(status().isBadRequest());
+        when(itemRequestClient.getOwnRequests(userId)).thenReturn(mockedResponse);
+
+        ResponseEntity<?> result = controller.getOwnRequests(userId);
+
+        verify(itemRequestClient, times(1)).getOwnRequests(userId);
+        assertEquals(mockedResponse, result);
+    }
+
+    @Test
+    void shouldGetAllRequests() {
+        Long userId = 3L;
+        List<ItemRequestResponseDto> responseList = List.of(new ItemRequestResponseDto());
+        ResponseEntity<List<ItemRequestResponseDto>> mockedResponse = ResponseEntity.ok(responseList);
+
+        when(itemRequestClient.getAllRequests(userId)).thenReturn(mockedResponse);
+
+        ResponseEntity<?> result = controller.getAllRequests(userId);
+
+        verify(itemRequestClient, times(1)).getAllRequests(userId);
+        assertEquals(mockedResponse, result);
+    }
+
+    @Test
+    void shouldGetRequestById() {
+        Long userId = 4L;
+        Long requestId = 10L;
+
+        ItemRequestResponseDto responseDto = new ItemRequestResponseDto();
+        responseDto.setId(requestId);
+
+        ResponseEntity<ItemRequestResponseDto> mockedResponse = ResponseEntity.ok(responseDto);
+
+        when(itemRequestClient.getRequestById(userId, requestId)).thenReturn(mockedResponse);
+
+        ResponseEntity<?> result = controller.getRequestById(userId, requestId);
+
+        verify(itemRequestClient, times(1)).getRequestById(userId, requestId);
+        assertEquals(mockedResponse, result);
     }
 }

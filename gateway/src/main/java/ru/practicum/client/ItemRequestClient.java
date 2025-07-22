@@ -4,8 +4,8 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
-import ru.practicum.shareit.dto.ItemRequestCreateDto;
-import ru.practicum.shareit.dto.ItemRequestResponseDto;
+import ru.practicum.dto.ItemRequestCreateDto;
+import ru.practicum.dto.ItemRequestResponseDto;
 
 import java.util.List;
 
