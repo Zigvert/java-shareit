@@ -2,20 +2,23 @@ package ru.practicum.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class ItemCreateDto {
-    @NotBlank
+    @NotBlank(message = "Name must not be blank")
     private String name;
 
-    @NotBlank
+    @NotBlank(message = "Description must not be blank")
     private String description;
 
-    @NotNull
+    @NotNull(message = "Availability must not be null")
     private Boolean available;
 
     private Long requestId;
 }
+
