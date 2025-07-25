@@ -1,4 +1,4 @@
-package service;
+package itemTest;
 
 import org.junit.jupiter.api.Test;
 import ru.practicum.shareit.item.dto.CommentDto;

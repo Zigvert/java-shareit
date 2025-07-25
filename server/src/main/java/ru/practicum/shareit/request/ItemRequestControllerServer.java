@@ -2,8 +2,8 @@ package ru.practicum.shareit.request;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.dto.ItemRequestCreateDto;
-import ru.practicum.shareit.dto.ItemRequestResponseDto;
+import ru.practicum.shareit.request.dto.ItemRequestCreateDto;
+import ru.practicum.shareit.request.dto.ItemRequestResponseDto;
 
 import java.util.List;
 

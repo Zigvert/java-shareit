@@ -1,4 +1,4 @@
-package service;
+package itemTest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
