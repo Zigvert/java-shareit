@@ -37,7 +37,7 @@ jobs:
 
       - name: Start Spring Boot app
         run: |
-          nohup mvn spring-boot:run > app.log 2>&1 &
+          nohup mvn -pl server spring-boot:run > app.log 2>&1 &
           sleep 25
           echo "===== SPRING LOG START ====="
           tail -n 100 app.log || true
